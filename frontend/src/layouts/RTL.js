@@ -12,6 +12,7 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 
 import routes from "routes.js";
+import userRoutes from "userRoutes.js";
 
 import styles from "assets/jss/material-dashboard-react/layouts/rtlStyle.js";
 
@@ -22,7 +23,7 @@ let ps;
 
 const switchRoutes = (
   <Switch>
-    {routes.map((prop, key) => {
+    {routes.concat(userRoutes).map((prop, key) => {
       if (prop.layout === "/rtl") {
         return (
           <Route
@@ -96,6 +97,7 @@ export default function RTL({ ...rest }) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
+        userRoutes={userRoutes}
         logoText={"الإبداعية تيم"}
         logo={logo}
         image={image}
