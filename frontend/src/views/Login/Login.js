@@ -15,6 +15,9 @@ import CardFooter from "components/Card/CardFooter.js";
 
 import avatar from "assets/img/faces/marc.jpg";
 
+//redux
+import store from "redux/store";
+
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -72,7 +75,7 @@ export default function Login() {
               </GridContainer>
             </CardBody>
             <CardFooter>
-              <Button color="primary">Login</Button>
+              <Button color="primary" onClick={() => {store.dispatch({type: 'login' , user: 1})}} >Login</Button>
             </CardFooter>
           </Card>
         </GridItem>
@@ -91,7 +94,7 @@ export default function Login() {
                 human foundation in truth And I love you like Kanye loves Kanye
                 I love Rick Owens’ bed design but the back is...
               </p>
-              <Button color="primary" round>
+              <Button  onClick={() => {console.log(';;;;; ' + store.getState());}}  color="primary" round>
                 Follow
               </Button>
             </CardBody>

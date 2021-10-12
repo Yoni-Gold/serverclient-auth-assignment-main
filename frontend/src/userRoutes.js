@@ -3,10 +3,11 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import Person from '@material-ui/icons/Person';
 import LogoutIcon from '@material-ui/icons/FirstPage';
 
-import UserProfile from "views/UserProfile/UserProfile.js";
-import Login from "views/Login/Login.js";
+import UserProfile from "views/UserProfile/UserProfile";
+import Login from "views/Login/Login";
 import Signup from "views/Signup/Signup";
-//import Logout from "views/UserProfile/UserProfile.js";
+import Logout from "views/Logout/Logout";
+
 
 
 const userRoutes = [
@@ -39,7 +40,7 @@ const userRoutes = [
       name: "Logout",
       rtlName: "ملف تعريفي للمستخدم",
       icon: LogoutIcon,
-      component: UserProfile,
+      component: Logout,
       layout: "/admin"
     }
   ];

@@ -17,18 +17,22 @@ import RTLNavbarLinks from "components/Navbars/RTLNavbarLinks.js";
 
 import styles from "assets/jss/material-dashboard-react/components/sidebarStyle.js";
 
+//redux
+import { useSelector } from "react-redux";
+
 const useStyles = makeStyles(styles);
 
 export default function Sidebar(props) {
+  const { color, logo, image, logoText, routes, userRoutes } = props;
   const classes = useStyles();
+  const userMenuOptions = useSelector(state => state ? userRoutes.slice(2) : userRoutes.slice(0, 2));
   // verifies if routeName is the one active (in browser input)
   function activeRoute(routeName) {
     return window.location.href.indexOf(routeName) > -1 ? true : false;
   }
-  const { color, logo, image, logoText, routes, userRoutes } = props;
   var links = (
     <List className={classes.list}>
-      {routes.concat(userRoutes).map((prop, key) => {
+      {routes.concat(userMenuOptions).map((prop, key) => {
         var activePro = " ";
         var listItemClasses;
         if (prop.path === "/upgrade-to-pro") {
