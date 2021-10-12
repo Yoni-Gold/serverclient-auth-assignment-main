@@ -1,4 +1,5 @@
-import React from "react";
+import React , { useState } from "react";
+import { Redirect } from "react-router";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -12,6 +13,8 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
+// axios
+import axios from "axios";
 
 import avatar from "assets/img/faces/marc.jpg";
 
@@ -38,6 +41,7 @@ const useStyles = makeStyles(styles);
 
 export default function Signup() {
   const classes = useStyles();
+  const [ userSubmition , setUserSubmition ] = useState(null);
   return (
     <div>
       <GridContainer>
@@ -135,7 +139,7 @@ export default function Signup() {
               </GridContainer>
             </CardBody>
             <CardFooter>
-              <Button color="primary">Signup</Button>
+              {userSubmition ? <Redirect to='/login'/> : <Button color="primary">Signup</Button>}
             </CardFooter>
           </Card>
         </GridItem>

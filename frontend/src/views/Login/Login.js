@@ -1,4 +1,5 @@
 import React from "react";
+import { Redirect } from "react-router";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -17,6 +18,7 @@ import avatar from "assets/img/faces/marc.jpg";
 
 //redux
 import store from "redux/store";
+import { useSelector } from "react-redux";
 
 const styles = {
   cardCategoryWhite: {
@@ -41,6 +43,7 @@ const useStyles = makeStyles(styles);
 
 export default function Login() {
   const classes = useStyles();
+  const userLoggedState = useSelector(store => store);
   return (
     <div>
       <GridContainer>
@@ -75,7 +78,7 @@ export default function Login() {
               </GridContainer>
             </CardBody>
             <CardFooter>
-              <Button color="primary" onClick={() => {store.dispatch({type: 'login' , user: 1})}} >Login</Button>
+              {userLoggedState ? <Redirect to='/'/> : <Button color="primary" onClick={() => {store.dispatch({type: 'login' , user: 1})}} >Login</Button>}
             </CardFooter>
           </Card>
         </GridItem>
@@ -94,7 +97,7 @@ export default function Login() {
                 human foundation in truth And I love you like Kanye loves Kanye
                 I love Rick Owens’ bed design but the back is...
               </p>
-              <Button  onClick={() => {console.log(';;;;; ' + store.getState());}}  color="primary" round>
+              <Button color="primary" round>
                 Follow
               </Button>
             </CardBody>
