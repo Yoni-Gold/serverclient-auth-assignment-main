@@ -8,7 +8,8 @@ interface User {
   city: string,
   country: string,
   postalCode: string,
-  aboutMe: string
+  aboutMe: string,
+  password: string
 } 
 
 const userSchema : Schema = new Schema<User>({
@@ -19,7 +20,8 @@ const userSchema : Schema = new Schema<User>({
   city: { type: String, required: true },
   country: { type: String, required: true },
   postalCode: { type: String, required: true },
-  aboutMe: { type: String, required: false }
+  aboutMe: { type: String, required: false },
+  password: { type: String, required: true }
 });
  
 userSchema.set('toJSON', {
