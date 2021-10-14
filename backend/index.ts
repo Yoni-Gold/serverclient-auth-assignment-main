@@ -3,6 +3,7 @@ import cors from 'cors'
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
 import User from './Schemas/User'
+import cookieParser from 'cookie-parser'
 
 import dotenv from 'dotenv'
 dotenv.config({path: './.env'});
@@ -10,6 +11,7 @@ dotenv.config({path: './.env'});
 const app = express();
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 
 /// necessary functions ///
@@ -24,7 +26,7 @@ const mongoConnect = async (_req : Request , _res : Response , next : NextFuncti
 // };
 
 const authentication = async (req : Request , _res : Response , next : NextFunction) => {
-    const token : string = req.headers.authorization && req.headers.authorization.split(' ')[1];
+    const token : string = req.cookies.token;
     req.body.user = await jwt.verify(token , process.env.SECRET);
     next();
 };
@@ -61,6 +63,7 @@ app.put('/user' , authentication , mongoConnect , async (req : Request, res : Re
     await User.findOneAndUpdate({ email: req.body.user.email , password: req.body.user.password } , { ...req.body.newUser });
     await mongoose.connection.close();
     let newToken = await jwt.sign({ ...req.body.newUser } , process.env.SECRET , { expiresIn: 120000 });
+    res.cookie('token', newToken, { httpOnly: true });
     res.send(newToken);
 });
 
@@ -70,7 +73,8 @@ app.post('/login' , mongoConnect , async (req : Request, res : Response) => {
     await mongoose.connection.close();
     if (user[0])
     {
-        let token = await jwt.sign(user[0] , process.env.SECRET , { expiresIn: 120000 });
+        let token = await jwt.sign({ user: user[0] } , process.env.SECRET , { expiresIn: 120000 });
+        res.cookie('token', token, { httpOnly: true });
         res.send(token);
     }
 
@@ -81,7 +85,7 @@ app.post('/login' , mongoConnect , async (req : Request, res : Response) => {
 });
 
 // login with token
-app.post('/token' , authentication , async (req : Request, res : Response) => {
+app.post('/token' , authentication , async (_req : Request, res : Response) => {
     res.send(true);
 });
 

@@ -1,4 +1,6 @@
-import React from "react";
+import React , { useRef , useState } from "react";
+import axios from 'axios';
+import md5 from 'md5';
 import { Redirect } from "react-router";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -15,6 +17,8 @@ import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 
 import avatar from "assets/img/faces/marc.jpg";
+
+import { ThreeDots } from '@agney/react-loading';
 
 //redux
 import store from "redux/store";
@@ -44,6 +48,27 @@ const useStyles = makeStyles(styles);
 export default function Login() {
   const classes = useStyles();
   const userLoggedState = useSelector(store => store);
+  const email = useRef();
+  const password = useRef();
+  const [ requestState , setRequestState ] = useState(null);
+  const loginRequest = async () => {
+    if (!RegExp('^(\\s)*$').test(email.current.value) && !RegExp('^(\\s)*$').test(password.current.value))
+    {  
+        setRequestState('pending');
+        const token = await axios.post(`http://localhost:3002/login` , { email: email.current.value.trim() , password: md5(password.current.value) })
+        .catch(error => {
+          console.log('wrong email or password');
+          setRequestState(null);
+        });
+        
+        if (token) 
+        {
+          store.dispatch({type: 'login' , token: token});
+          setRequestState('done');
+        }
+    }
+  };
+  
   return (
     <div>
       <GridContainer>
@@ -56,29 +81,32 @@ export default function Login() {
             <CardBody>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
-                  <CustomInput
+                  {/* <CustomInput ref={email} 
                     labelText="Email address"
                     id="email-address"
                     formControlProps={{
                       fullWidth: true
                     }}
-                  />
+                  /> */}
+                  <input ref={email}/>
                 </GridItem>
               </GridContainer>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
-                  <CustomInput
+                  {/* <CustomInput ref={password}
                     labelText="Password"
                     id="password"
+                    inputProps={{ type: 'password' }}
                     formControlProps={{
                       fullWidth: true
                     }}
-                  />
+                  /> */}
+                  <input ref={password}/>
                 </GridItem>
               </GridContainer>
             </CardBody>
             <CardFooter>
-              {userLoggedState ? <Redirect to='/'/> : <Button color="primary" onClick={() => {store.dispatch({type: 'login' , user: 1})}} >Login</Button>}
+              {(userLoggedState || requestState === 'done') ? <Redirect to='/'/> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button color="primary" onClick={loginRequest} >Login</Button>}
             </CardFooter>
           </Card>
         </GridItem>
