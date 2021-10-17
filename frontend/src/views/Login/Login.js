@@ -55,7 +55,7 @@ export default function Login() {
     if (!RegExp('^(\\s)*$').test(email.current.value) && !RegExp('^(\\s)*$').test(password.current.value))
     {  
         setRequestState('pending');
-        const token = await axios.post(`http://localhost:3002/login` , { email: email.current.value.trim() , password: md5(password.current.value) })
+        const token = await axios.post(`/login` , { email: email.current.value.trim() , password: md5(password.current.value) })
         .catch(error => {
           console.log('wrong email or password');
           setRequestState(null);
@@ -81,27 +81,26 @@ export default function Login() {
             <CardBody>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
-                  {/* <CustomInput ref={email} 
+                  <CustomInput
                     labelText="Email address"
                     id="email-address"
+                    inputProps={{ inputRef: email }}
                     formControlProps={{
                       fullWidth: true
                     }}
-                  /> */}
-                  <input ref={email}/>
+                  />
                 </GridItem>
               </GridContainer>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
-                  {/* <CustomInput ref={password}
+                  <CustomInput
                     labelText="Password"
                     id="password"
-                    inputProps={{ type: 'password' }}
+                    inputProps={{ type: 'password' , inputRef: password }}
                     formControlProps={{
                       fullWidth: true
                     }}
-                  /> */}
-                  <input ref={password}/>
+                  />
                 </GridItem>
               </GridContainer>
             </CardBody>

@@ -1,4 +1,4 @@
-import React from "react";
+import React , { useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
@@ -18,6 +18,12 @@ import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
 import bgImage from "assets/img/sidebar-2.jpg";
 import logo from "assets/img/reactlogo.png";
+
+import axios from "axios";
+
+//redux
+import store from "redux/store";
+import { useSelector } from "react-redux";
 
 let ps;
 
@@ -51,6 +57,12 @@ export default function Admin({ ...rest }) {
   const [color, setColor] = React.useState("blue");
   const [fixedClasses, setFixedClasses] = React.useState("dropdown show");
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  useEffect(() => {
+    (async () => {
+    let token = await axios.get(`/token`);
+    if (token) store.dispatch({type: 'login' , token: token})
+    })()
+} , []);
   const handleImageClick = image => {
     setImage(image);
   };
