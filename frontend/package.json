@@ -4,7 +4,7 @@
   "description": "Material Dashboard React. Coded by Creative Tim",
   "private": false,
   "main": "dist/index.js",
-  "proxy": "http://localhost:3002",
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "@agney/react-loading": "^0.1.2",
     "@material-ui/core": "4.3.2",

@@ -27,7 +27,10 @@ const errorHandle = (error : Error ,  _req : Request , res : Response , _next : 
 
 const authentication = async (req : Request , _res : Response , next : NextFunction) => {
     const token : string = req.cookies.token;
-    req.body.user = await jwt.verify(token , process.env.SECRET , (error : Error) => next(error));
+    req.body = await jwt.verify(token , process.env.SECRET , (error : Error , decoded : Object) => {
+        error && next(error);
+        return decoded;    
+    });
     next();
 };
 
@@ -54,13 +57,17 @@ app.post('/user' , mongoConnect , async (req : Request, res : Response) => {
     }
 });
 
+// send back user info
+app.get('/user' , authentication , mongoConnect , async (req : Request, res : Response) => {
+    res.json({ ...req.body.user , password: null });
+});
+
 // update user
 app.put('/user' , authentication , mongoConnect , async (req : Request, res : Response) => {
-    await User.findOneAndUpdate({ email: req.body.user.email , password: req.body.user.password } , { ...req.body.newUser });
+    await User.findOneAndUpdate({ email: req.body.user.email , password: req.body.user.password } , { password: req.body.user.password , ...req.body.newUser });
     await mongoose.connection.close();
-    let newToken = await jwt.sign({ ...req.body.newUser } , process.env.SECRET , { expiresIn: '50s' });
-    res.cookie('token', newToken, { httpOnly: true });
-    res.send(newToken);
+    let newToken = await jwt.sign({ password: req.body.user.password , ...req.body.newUser } , process.env.SECRET , { expiresIn: '50s' });
+    res.cookie('token', newToken, { httpOnly: true }).send(newToken);
 });
 
 // login with email and password

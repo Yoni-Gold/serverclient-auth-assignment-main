@@ -4,7 +4,6 @@ import md5 from 'md5';
 import { Redirect } from "react-router";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -50,6 +49,7 @@ export default function Login() {
   const userLoggedState = useSelector(store => store);
   const email = useRef();
   const password = useRef();
+  const [ errorState , setError ] = useState({email: false , password: false});
   const [ requestState , setRequestState ] = useState(null);
   const loginRequest = async () => {
     if (!RegExp('^(\\s)*$').test(email.current.value) && !RegExp('^(\\s)*$').test(password.current.value))
@@ -67,6 +67,14 @@ export default function Login() {
           setRequestState('done');
         }
     }
+
+    else
+    {
+      let newError = {...errorState};
+      RegExp('^(\\s)*$').test(email.current.value) ? newError.email = true : newError.email = false;
+      RegExp('^(\\s)*$').test(password.current.value) ? newError.password = true : newError.password = false;
+      setError(newError);
+    }
   };
   
   return (
@@ -82,11 +90,12 @@ export default function Login() {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
                   <CustomInput
+                    error={errorState.email}
                     labelText="Email address"
                     id="email-address"
                     inputProps={{ inputRef: email }}
                     formControlProps={{
-                      fullWidth: true
+                      fullWidth: true,
                     }}
                   />
                 </GridItem>
@@ -94,11 +103,12 @@ export default function Login() {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
                   <CustomInput
+                    error={errorState.password}
                     labelText="Password"
                     id="password"
                     inputProps={{ type: 'password' , inputRef: password }}
                     formControlProps={{
-                      fullWidth: true
+                      fullWidth: true,
                     }}
                   />
                 </GridItem>

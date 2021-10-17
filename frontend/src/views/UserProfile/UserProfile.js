@@ -1,4 +1,5 @@
-import React from "react";
+import React , { useState , useRef , useEffect } from "react";
+import { Redirect } from "react-router";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -14,6 +15,14 @@ import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 
 import avatar from "assets/img/faces/marc.jpg";
+
+import md5 from "md5";
+
+import axios from "axios";
+
+import { ThreeDots } from '@agney/react-loading';
+
+import { useSelector } from 'react-redux';
 
 const styles = {
   cardCategoryWhite: {
@@ -38,8 +47,61 @@ const useStyles = makeStyles(styles);
 
 export default function UserProfile() {
   const classes = useStyles();
+  const userLoggedState = useSelector(store => store);
+  const [ user , setUser ] = useState(null);
+  const [ errorState , setError ] = useState({userName: false, email: false, firstName: false, lastName: false, city: false, country: false, postalCode: false})
+  const [ requestState , setRequestState ] = useState(null);
+  const userName = useRef();
+  const email = useRef();
+  const firstName = useRef();
+  const lastName = useRef();
+  const city = useRef();
+  const country = useRef();
+  const postalCode = useRef();
+  const aboutMe = useRef();
+
+  useEffect(() => {(async () => {
+    const { data: userInfo } = await axios.get('/user');
+    setUser(userInfo);
+  })()} , []);
+
+  const handleSubmit = async () => {
+    if ([userName, email, firstName, lastName, city, country, postalCode].every(field => !RegExp('^(\\s)*$').test(field.current.value)))
+    {  
+        setRequestState('pending');
+        const token = await axios.put(`/user` , { 
+          userName: userName.current.value.trim(),  
+          email: email.current.value.trim(), 
+          firstName: firstName.current.value.trim(),
+          lastName: lastName.current.value.trim(),
+          city: city.current.value.trim(),
+          country: country.current.value.trim(),
+          postalCode: postalCode.current.value.trim(),
+          aboutMe: aboutMe.current.value.trim()
+        })
+        .catch(error => {
+          console.log('an error happened');
+          setRequestState(null);
+        });
+        
+        if (token) 
+        {
+          setRequestState('done');
+        }
+    }
+
+    else
+    {
+      let newError = {...errorState};
+      [userName, email, firstName, lastName, city, country, postalCode].forEach(field => { 
+        RegExp('^(\\s)*$').test(field.current.value) ? newError[field.current.id] = true : newError[field.current.id] = false;
+      });
+      setError(newError);
+    }
+  };
+
   return (
-    <div>
+    <>{user ? <div>
       <GridContainer>
         <GridItem xs={12} sm={12} md={8}>
           <Card>
@@ -49,33 +111,31 @@ export default function UserProfile() {
             </CardHeader>
             <CardBody>
               <GridContainer>
-                <GridItem xs={12} sm={12} md={5}>
+                <GridItem xs={12} sm={12} md={3}>
                   <CustomInput
-                    labelText="Company (disabled)"
-                    id="company-disabled"
+                    error={errorState.userName}
+                    labelText="Username"
+                    id="userName"
                     formControlProps={{
                       fullWidth: true
                     }}
                     inputProps={{
-                      disabled: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={3}>
-                  <CustomInput
-                    labelText="Username"
-                    id="username"
-                    formControlProps={{
-                      fullWidth: true
+                      defaultValue: user.userName,
+                      inputRef: userName
                     }}
                   />
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
+                    error={errorState.email}
                     labelText="Email address"
-                    id="email-address"
+                    id="email"
                     formControlProps={{
                       fullWidth: true
+                    }}
+                    inputProps={{
+                      defaultValue: user.email,
+                      inputRef: email
                     }}
                   />
                 </GridItem>
@@ -83,19 +143,29 @@ export default function UserProfile() {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
                   <CustomInput
+                    error={errorState.firstName}
                     labelText="First Name"
-                    id="first-name"
+                    id="firstName"
                     formControlProps={{
                       fullWidth: true
+                    }}
+                    inputProps={{
+                      defaultValue: user.firstName,
+                      inputRef: firstName
                     }}
                   />
                 </GridItem>
                 <GridItem xs={12} sm={12} md={6}>
                   <CustomInput
+                    error={errorState.lastName}
                     labelText="Last Name"
-                    id="last-name"
+                    id="lastName"
                     formControlProps={{
                       fullWidth: true
+                    }}
+                    inputProps={{
+                      defaultValue: user.lastName,
+                      inputRef: lastName
                     }}
                   />
                 </GridItem>
@@ -103,28 +173,43 @@ export default function UserProfile() {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
+                    error={errorState.city}
                     labelText="City"
                     id="city"
                     formControlProps={{
                       fullWidth: true
                     }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="Country"
-                    id="country"
-                    formControlProps={{
-                      fullWidth: true
+                    inputProps={{
+                      defaultValue: user.city,
+                      inputRef: city
                     }}
                   />
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="Postal Code"
-                    id="postal-code"
+                    error={errorState.country}
+                    labelText="Country"
+                    id="country"
                     formControlProps={{
                       fullWidth: true
+                    }}
+                    inputProps={{
+                      defaultValue: user.country,
+                      inputRef: country
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    error={errorState.postalCode}
+                    labelText="Postal Code"
+                    id="postalCode"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                    inputProps={{
+                      defaultValue: user.postalCode,
+                      inputRef: postalCode
                     }}
                   />
                 </GridItem>
@@ -134,11 +219,13 @@ export default function UserProfile() {
                   <InputLabel style={{ color: "#AAAAAA" }}>About me</InputLabel>
                   <CustomInput
                     labelText="Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo."
-                    id="about-me"
+                    id="aboutMe"
                     formControlProps={{
                       fullWidth: true
                     }}
                     inputProps={{
+                      defaultValue: user.aboutMe,
+                      inputRef: aboutMe,
                       multiline: true,
                       rows: 5
                     }}
@@ -147,7 +234,8 @@ export default function UserProfile() {
               </GridContainer>
             </CardBody>
             <CardFooter>
-              <Button color="primary">Update Profile</Button>
+              {userLoggedState ? <></> : <Redirect to='/'/>}
+              {requestState === 'done' ? <Redirect to='/' /> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button onClick={handleSubmit} color="primary">Update Profile</Button>}
             </CardFooter>
           </Card>
         </GridItem>
@@ -173,6 +261,6 @@ export default function UserProfile() {
           </Card>
         </GridItem>
       </GridContainer>
-    </div>
+    </div> : <ThreeDots width='200' />}</>
   );
 }
