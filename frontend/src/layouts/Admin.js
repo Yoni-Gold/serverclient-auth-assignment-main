@@ -12,18 +12,16 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 
 import routes from "routes.js";
-import userRoutes from "userRoutes.js";
+import userRoutes from "userRoutes.js"; // routes that change based on user log state
 
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
 import bgImage from "assets/img/sidebar-2.jpg";
 import logo from "assets/img/reactlogo.png";
-
+// axios
 import axios from "axios";
-
 //redux
 import store from "redux/store";
-import { useSelector } from "react-redux";
 
 let ps;
 
@@ -57,12 +55,14 @@ export default function Admin({ ...rest }) {
   const [color, setColor] = React.useState("blue");
   const [fixedClasses, setFixedClasses] = React.useState("dropdown show");
   const [mobileOpen, setMobileOpen] = React.useState(false);
+
   useEffect(() => {
     (async () => {
-    let token = await axios.get(`/token`);
-    if (token) store.dispatch({type: 'login' , token: token})
+      let token = await axios.get(`/token`);
+      if (token) store.dispatch({type: 'login' , token: token})
     })()
-} , []);
+  } , []);
+
   const handleImageClick = image => {
     setImage(image);
   };

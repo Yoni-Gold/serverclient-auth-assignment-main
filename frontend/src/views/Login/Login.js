@@ -16,12 +16,12 @@ import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 
 import avatar from "assets/img/faces/marc.jpg";
-
+// loading component
 import { ThreeDots } from '@agney/react-loading';
-
 //redux
 import store from "redux/store";
 import { useSelector } from "react-redux";
+import { Label } from "@material-ui/icons";
 
 const styles = {
   cardCategoryWhite: {
@@ -51,16 +51,17 @@ export default function Login() {
   const password = useRef();
   const [ errorState , setError ] = useState({email: false , password: false});
   const [ requestState , setRequestState ] = useState(null);
+  const [ wrongLogin , setWrongLogin ] = useState(false);
   const loginRequest = async () => {
     if (!RegExp('^(\\s)*$').test(email.current.value) && !RegExp('^(\\s)*$').test(password.current.value))
     {  
         setRequestState('pending');
         const token = await axios.post(`/login` , { email: email.current.value.trim() , password: md5(password.current.value) })
-        .catch(error => {
-          console.log('wrong email or password');
+        .catch(({ response }) => {
           setRequestState(null);
+          setWrongLogin(response.data.error);
         });
-        
+
         if (token) 
         {
           store.dispatch({type: 'login' , token: token});
@@ -116,6 +117,7 @@ export default function Login() {
             </CardBody>
             <CardFooter>
               {(userLoggedState || requestState === 'done') ? <Redirect to='/'/> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button color="primary" onClick={loginRequest} >Login</Button>}
+              <p style={{color: 'red'}}>{ wrongLogin }</p>
             </CardFooter>
           </Card>
         </GridItem>

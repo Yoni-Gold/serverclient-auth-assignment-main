@@ -1,0 +1,29 @@
+version: "3.5"
+
+services:
+  server:
+    build: ./backend
+    ports: 
+      - "3001:3001"
+    volumes:
+      - ./server:/app/server
+      - /app/server/node_modules
+    networks:
+      - main-network
+
+  client:
+    build: ./frontend
+    stdin_open: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    volumes:
+      - ./frontend:/app/client
+      - /app/client/node_modules
+    networks:
+      - main-network
+    
+  networks:
+    - main-network:
+      driver: bridge

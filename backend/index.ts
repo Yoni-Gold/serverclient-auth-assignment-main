@@ -16,24 +16,29 @@ app.use(express.json());
 
 /// necessary functions ///
 
+// connecting to the mongo database
 const mongoConnect = async (_req : Request , _res : Response , next : NextFunction) => {
     await mongoose.connect(`mongodb+srv://yoni:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}.uv5un.mongodb.net/${process.env.MONGO_DBNAME}?retryWrites=true&w=majority`);
     next();
 }
 
+// basic error handler
 const errorHandle = (error : Error ,  _req : Request , res : Response , _next : NextFunction) => {
     if (error) res.status(500).send(error.message);
 };
 
+// checking the jwt and decoding it
 const authentication = async (req : Request , _res : Response , next : NextFunction) => {
     const token : string = req.cookies.token;
-    req.body = await jwt.verify(token , process.env.SECRET , (error : Error , decoded : Object) => {
+    const decoded = await jwt.verify(token , process.env.SECRET , (error : Error , decoded : Object) => {
         error && next(error);
         return decoded;    
     });
+    req.body.user = decoded && { ...decoded.user };
     next();
 };
 
+// in case of 404 errors
 const unknownEndpoint = (_req : Request, res : Response) => {
     if (!res.headersSent) res.status(404).send({ error: 'unknown endpoint' });
 };
@@ -42,10 +47,10 @@ const unknownEndpoint = (_req : Request, res : Response) => {
 
 // create new user
 app.post('/user' , mongoConnect , async (req : Request, res : Response) => {
-    const user : Array<Object> = await User.find({ email: req.body.email });
+    const user : Array<Object> = await User.find({ email: req.body.user.email });
     if (user[0]) 
     {
-        res.send('this user\'s email already exists');
+        res.status(500).json({ error: 'This email is already registered '});
     }
 
     else
@@ -64,9 +69,14 @@ app.get('/user' , authentication , mongoConnect , async (req : Request, res : Re
 
 // update user
 app.put('/user' , authentication , mongoConnect , async (req : Request, res : Response) => {
-    await User.findOneAndUpdate({ email: req.body.user.email , password: req.body.user.password } , { password: req.body.user.password , ...req.body.newUser });
+    const user : Array<Object> = await User.find({ email: req.body.newUser.email });
+    if (user[0] && req.body.newUser.email !== req.body.user.email) 
+    {
+        res.status(500).json({ error: 'The new email is already exists '});
+    }
+    await User.findOneAndUpdate({ email: req.body.user.email , password: req.body.user.password } , { ...req.body.newUser , password: req.body.user.password });
     await mongoose.connection.close();
-    let newToken = await jwt.sign({ password: req.body.user.password , ...req.body.newUser } , process.env.SECRET , { expiresIn: '50s' });
+    let newToken = await jwt.sign({ user: { ...req.body.newUser , password: req.body.user.password } } , process.env.SECRET , { expiresIn: '50s' });
     res.cookie('token', newToken, { httpOnly: true }).send(newToken);
 });
 
@@ -77,13 +87,12 @@ app.post('/login' , mongoConnect , async (req : Request, res : Response) => {
     if (user[0])
     {
         let token = await jwt.sign({ user: user[0] } , process.env.SECRET , { expiresIn: '50s' });
-        res.cookie('token', token, { httpOnly: true });
-        res.send(token);
+        res.cookie('token', token, { httpOnly: true }).send(token);
     }
 
     else
     {
-        res.status(401).send(false);
+        res.status(401).json({ error: 'Wrong email or password' });
     }
 });
 
@@ -93,7 +102,7 @@ app.get('/token' , authentication , async (req : Request, res : Response) => {
 });
 
 // logout deletes the web token
-app.post('/logout' , authentication, async (_req : Request, res : Response) => {
+app.post('/logout' , async (_req : Request, res : Response) => {
     res.cookie('token', 'cleared').send('cleared token');
 });
 

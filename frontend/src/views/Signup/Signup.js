@@ -17,9 +17,9 @@ import CardFooter from "components/Card/CardFooter.js";
 import axios from "axios";
 //redux
 import { useSelector } from "react-redux";
-
+// encription library
 import md5 from "md5";
-
+// loading component
 import { ThreeDots } from '@agney/react-loading';
 
 import avatar from "assets/img/faces/marc.jpg";
@@ -50,6 +50,7 @@ export default function Signup() {
   const userLoggedState = useSelector(store => store);
   const [ errorState , setError ] = useState({userName: false, email: false, password: false, firstName: false, lastName: false, city: false, country: false, postalCode: false})
   const [ requestState , setRequestState ] = useState(null);
+  const [ wrongSignup , setWrongSignup ] = useState(null);
   const userName = useRef();
   const password = useRef();
   const email = useRef();
@@ -75,9 +76,9 @@ export default function Signup() {
           postalCode: postalCode.current.value.trim(),
           aboutMe: aboutMe.current.value.trim()
         }})
-        .catch(error => {
-          console.log('user email exists');
+        .catch(({ response }) => {
           setRequestState(null);
+          setWrongSignup(response.data.error);
         });
         
         if (token) 
@@ -221,8 +222,9 @@ export default function Signup() {
               </GridContainer>
             </CardBody>
             <CardFooter>
+              {requestState === 'done' ? <Redirect to='/admin/login' /> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button onClick={handleSubmit} color="primary">Signup</Button>}
               {userLoggedState ? <Redirect to='/'/> : <></>}
-              {requestState === 'done' ? <Redirect to='/login' /> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button onClick={handleSubmit} color="primary">Signup</Button>}
+              <p style={{color: 'red'}}>{ wrongSignup }</p>
             </CardFooter>
           </Card>
         </GridItem>

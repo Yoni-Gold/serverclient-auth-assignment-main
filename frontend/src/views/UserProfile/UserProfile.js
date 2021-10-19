@@ -16,12 +16,9 @@ import CardFooter from "components/Card/CardFooter.js";
 
 import avatar from "assets/img/faces/marc.jpg";
 
-import md5 from "md5";
-
+// axios, loading component and redux
 import axios from "axios";
-
 import { ThreeDots } from '@agney/react-loading';
-
 import { useSelector } from 'react-redux';
 
 const styles = {
@@ -49,8 +46,9 @@ export default function UserProfile() {
   const classes = useStyles();
   const userLoggedState = useSelector(store => store);
   const [ user , setUser ] = useState(null);
-  const [ errorState , setError ] = useState({userName: false, email: false, firstName: false, lastName: false, city: false, country: false, postalCode: false})
+  const [ errorState , setError ] = useState({userName: false, email: false, firstName: false, lastName: false, city: false, country: false, postalCode: false});
   const [ requestState , setRequestState ] = useState(null);
+  const [ wrongUpdate , setWrongUpdate ] = useState(null);
   const userName = useRef();
   const email = useRef();
   const firstName = useRef();
@@ -69,7 +67,7 @@ export default function UserProfile() {
     if ([userName, email, firstName, lastName, city, country, postalCode].every(field => !RegExp('^(\\s)*$').test(field.current.value)))
     {  
         setRequestState('pending');
-        const token = await axios.put(`/user` , { 
+        const token = await axios.put(`/user` , { newUser: {
           userName: userName.current.value.trim(),  
           email: email.current.value.trim(), 
           firstName: firstName.current.value.trim(),
@@ -78,10 +76,10 @@ export default function UserProfile() {
           country: country.current.value.trim(),
           postalCode: postalCode.current.value.trim(),
           aboutMe: aboutMe.current.value.trim()
-        })
-        .catch(error => {
-          console.log('an error happened');
+        }})
+        .catch(({ response }) => {
           setRequestState(null);
+          setWrongUpdate(response.data.error);
         });
         
         if (token) 
@@ -236,6 +234,7 @@ export default function UserProfile() {
             <CardFooter>
               {userLoggedState ? <></> : <Redirect to='/'/>}
               {requestState === 'done' ? <Redirect to='/' /> : requestState === 'pending' ? <ThreeDots width='100'/> : <Button onClick={handleSubmit} color="primary">Update Profile</Button>}
+              <p style={{color: 'red'}}>{ wrongUpdate }</p>
             </CardFooter>
           </Card>
         </GridItem>
