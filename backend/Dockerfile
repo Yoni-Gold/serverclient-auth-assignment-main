@@ -1,8 +1,13 @@
 FROM node:12
 
+USER root
+
 WORKDIR /app/server
 
 COPY ./package.json .
+COPY ./tsconfig.json .
+
+RUN npm i -g ts-node
 
 RUN npm i
 

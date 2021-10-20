@@ -6,7 +6,7 @@ services:
     ports: 
       - "3001:3001"
     volumes:
-      - ./server:/app/server
+      - ./backend:/app/server
       - /app/server/node_modules
     networks:
       - main-network
@@ -24,6 +24,6 @@ services:
     networks:
       - main-network
     
-  networks:
-    - main-network:
-      driver: bridge
+networks:
+  main-network:
+    driver: bridge

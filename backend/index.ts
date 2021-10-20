@@ -86,7 +86,7 @@ app.post('/login' , mongoConnect , async (req : Request, res : Response) => {
     await mongoose.connection.close();
     if (user[0])
     {
-        let token = await jwt.sign({ user: user[0] } , process.env.SECRET , { expiresIn: '50s' });
+        let token = await jwt.sign({ user: user[0] } , process.env.SECRET , { expiresIn: '3m' });
         res.cookie('token', token, { httpOnly: true }).send(token);
     }
 
