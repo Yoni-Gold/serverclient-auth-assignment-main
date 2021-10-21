@@ -10,6 +10,7 @@ The client was created for me and I only implemented the different routes for th
 Before you start the project make sure its configured right. First create a .env file in the backend directory that will include all the following variabels:
 - MONGO_CLUSTER: this is the cluster you will use in your mongodb database
 - MONGO_DBNAME: this will be the database name in the cluster
+- MONGO_USERNAME: this is the user name of your data base user in mongo
 - MONGO_PASSWORD: this is your personal password for the mongodb account
 - SECRET: this is the secret key nececery for the jwt encryption (can be whatever you want)
 
